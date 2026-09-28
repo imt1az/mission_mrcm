@@ -1,3 +1,5 @@
+import { Modal } from '../components/Modal';
+import { courseTheme } from '../lib/courseTheme';
 import { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
@@ -12,7 +14,6 @@ import {
   GraduationCap,
   Play,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react';
 import {
   Alert,
@@ -34,95 +35,52 @@ export function Dashboard() {
   const { user } = useAuth();
   const resource = useResource('/dashboard');
   const d = resource.data;
+  const isActive = (en) =>
+    en.status === 'active' && (!en.expires_at || new Date(en.expires_at) > new Date());
+  const activeCourse = d?.enrollments.find(isActive)?.course;
   const featured = d
     ? [
-        ...d.enrollments.map((en) => ({
-          course: en.course,
-          enrolled:
-            en.status === 'active' && (!en.expires_at || new Date(en.expires_at) > new Date()),
-        })),
+        ...d.enrollments.map((en) => ({ course: en.course, enrolled: isActive(en) })),
         ...d.available_courses
           .filter((c) => !d.enrollments.some((en) => en.course.id === c.id))
           .map((course) => ({ course, enrolled: false })),
       ].slice(0, 3)
     : [];
   return (
-    <>
-      <PageTitle
-        eyebrow="LET’S MAKE TODAY COUNT"
-        title={`Welcome back, ${user?.name.replace(/^Dr\.\s*/, '').split(' ')[0]}.`}
-        text="A little progress today brings your next milestone closer."
-      />
+    <div className="student-dashboard">
+      <PageTitle title={`Welcome back, ${user?.name.replace(/^Dr\.\s*/, '').split(' ')[0]}.`} />
       <Alert message={resource.error} />
       {resource.loading ? (
         <Loading />
       ) : (
         d && (
           <>
-            <div className="dashboard-hero">
+            {/* <div className="dashboard-hero">
               <div>
-                <Badge tone="lime">
-                  <span className="live-dot" /> YOUR NEXT CHAPTER
-                </Badge>
-                <h2>
-                  Great things start
-                  <br />
-                  with a little <em>practice.</em>
-                </h2>
-                <p>
-                  Pick up where you left off, or discover something new.
-                  <br />
-                  Your learning journey is yours to shape.
-                </p>
-                <Link
-                  className="btn btn-lime"
-                  to={d.enrollments[0] ? `/courses/${d.enrollments[0].course.slug}` : '/courses'}
-                >
-                  Let’s get learning
-                  <ArrowUpRight size={17} />
-                </Link>
+                <h2>{activeCourse ? 'Continue learning' : 'Start your preparation'}</h2>
+                <p>{activeCourse ? activeCourse.title : 'Choose a course to start practising.'}</p>
+             
               </div>
               <div className="dashboard-hero-art" aria-hidden="true">
                 <div className="hero-ring" />
                 <div className="hero-ring ring-two" />
-                <BookOpen size={86} strokeWidth={1.1} />
-                <span className="dashboard-spark">✳</span>
-                <span className="hero-art-caption">ONE STEP CLOSER</span>
+                <BookOpen size={70} strokeWidth={1.5} />
               </div>
-            </div>
+            </div> */}
             <div className="stats-grid">
+              <Stat icon={<BookOpen size={22} />} label="Active courses" value={d.enrolled_count} />
+              <Stat icon={<FileCheck2 size={22} />} label="Exam attempts" value={d.attempt_count} />
               <Stat
-                icon={<BookOpen size={21} />}
-                label="Active courses"
-                value={d.enrolled_count}
-                detail="Your learning, in one place"
-              />
-              <Stat
-                icon={<FileCheck2 size={21} />}
-                label="Exam attempts"
-                value={d.attempt_count}
-                detail="Every attempt is progress"
-              />
-              <Stat
-                icon={<ChartNoAxesCombined size={21} />}
+                icon={<ChartNoAxesCombined size={22} />}
                 label="Average score"
                 value={d.average_score === null ? '—' : `${d.average_score}%`}
-                detail={
-                  d.average_score === null
-                    ? 'Your first result starts here'
-                    : 'Across completed, visible results'
-                }
               />
             </div>
-            <section className="content-section">
+            {/* <section className="content-section">
               <div className="section-heading compact">
-                <div>
-                  <h2>Continue your journey</h2>
-                  <p>Your courses and new possibilities, ready when you are.</p>
-                </div>
+                <h2>Courses</h2>
                 <Link to="/my-courses" className="text-link">
-                  View my courses
-                  <ArrowRight size={16} />
+                  My courses <ArrowRight size={16} />
                 </Link>
               </div>
               {featured.length ? (
@@ -137,59 +95,36 @@ export function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <Empty
-                  title="Your first chapter awaits"
-                  text="Explore our courses and choose your starting point."
-                >
+                <Empty title="No courses yet" text="Browse available courses to get started.">
                   <Link className="btn btn-dark" to="/courses">
-                    Explore courses
-                    <ArrowRight size={16} />
+                    Browse courses <ArrowRight size={16} />
                   </Link>
                 </Empty>
               )}
-            </section>
-            <div className="dashboard-lower">
-              <section className="panel">
-                <div className="panel-heading">
-                  <h3>Recent activity</h3>
-                  <Link to="/results" className="text-link">
-                    View all
-                    <ArrowUpRight size={15} />
-                  </Link>
-                </div>
-                <HistoryList attempts={d.recent_attempts} />
-              </section>
-              <div className="next-step-card">
-                <span className="eyebrow">A MOMENT OF FOCUS</span>
-                <Sparkles size={30} />
-                <h3>
-                  Consistency over
-                  <br />
-                  perfection.
-                </h3>
-                <p>Choose a practice exam and give yourself a little time to learn today.</p>
-                <Link to="/my-courses" className="text-link">
-                  Find an exam
-                  <ArrowRight size={16} />
+            </section> */}
+            <section className="panel content-section dashboard-recent">
+              <div className="panel-heading">
+                <h3>Recent exams</h3>
+                <Link to="/results" className="text-link">
+                  View results <ArrowUpRight size={16} />
                 </Link>
               </div>
-            </div>
+              <HistoryList attempts={d.recent_attempts} />
+            </section>
           </>
         )
       )}
-    </>
+    </div>
   );
 }
-function Stat({ icon, label, value, detail }) {
+function Stat({ icon, label, value }) {
   return (
     <div className="stat-card">
       <span className="icon-tile">{icon}</span>
       <div>
         <span className="stat-label">{label}</span>
         <strong>{value}</strong>
-        <small>{detail}</small>
       </div>
-      <ArrowUpRight className="stat-arrow" size={18} />
     </div>
   );
 }
@@ -230,7 +165,7 @@ export function HistoryList({ attempts }) {
       ))}
     </div>
   ) : (
-    <Empty title="A fresh page" text="Your exam attempts and results will appear here." />
+    <Empty title="No exams yet" text="Your exam attempts will appear here." />
   );
 }
 export function Courses() {
@@ -274,6 +209,16 @@ export function Courses() {
           onChange={(s) => filter('search', s)}
           placeholder="Find your course…"
         />
+        <select
+          aria-label="Sort courses"
+          value={params.get('sort') || ''}
+          onChange={(e) => filter('sort', e.target.value)}
+        >
+          <option value="">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="title">Title A–Z</option>
+          <option value="price">Price: low to high</option>
+        </select>
       </div>
       <Alert message={r.error} />
       {r.loading ? (
@@ -300,6 +245,21 @@ export function Courses() {
 }
 export function MyCourses() {
   const r = useResource('/my-courses');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const effectiveStatus = (row) =>
+    row.status === 'active' && row.expires_at && new Date(row.expires_at) <= new Date()
+      ? 'expired'
+      : row.status;
+  const rows = (r.data || []).filter(
+    (row) =>
+      (!status || effectiveStatus(row) === status) &&
+      [row.course?.title, row.transaction_reference, row.payment_method]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+  );
   return (
     <>
       <PageTitle
@@ -312,25 +272,48 @@ export function MyCourses() {
           <ArrowUpRight size={17} />
         </Link>
       </PageTitle>
+      <div className="catalog-toolbar">
+        <SearchBox value={search} onChange={setSearch} placeholder="Search courses" />
+        <select
+          aria-label="Filter status"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="">All statuses</option>
+          <option value="active">active</option>
+          <option value="pending">pending</option>
+          <option value="expired">expired</option>
+          <option value="cancelled">cancelled</option>
+        </select>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => {
+            setSearch('');
+            setStatus('');
+          }}
+        >
+          Reset filters
+        </button>
+      </div>
       <Alert message={r.error} />
       {r.loading ? (
         <Loading />
-      ) : r.data?.length ? (
+      ) : rows.length ? (
         <div className="course-grid">
-          {r.data.map((e, i) => (
+          {rows.map((e, i) => (
             <div key={e.id}>
-              {e.status !== 'active' && (
+              {effectiveStatus(e) !== 'active' && (
                 <div className="enrollment-status">
-                  <Status value={e.status} />
+                  <Status value={effectiveStatus(e)} />
                 </div>
               )}
-              <CourseCard course={e.course} enrolled={e.status === 'active'} index={i} />
+              <CourseCard course={e.course} enrolled={effectiveStatus(e) === 'active'} index={i} />
             </div>
           ))}
         </div>
       ) : (
         <Empty
-          title="Find your first course"
+          title={search || status ? 'No matching courses' : 'Find your first course'}
           text="Enroll in a course to begin your learning journey."
         >
           <Link className="btn btn-dark" to="/courses">
@@ -363,6 +346,7 @@ export function CourseDetails() {
       return;
     }
     if (c?.course_type === 'paid') {
+      setError('');
       setPayment(true);
       return;
     }
@@ -394,12 +378,12 @@ export function CourseDetails() {
     }
   }
   return (
-    <div className="container course-detail">
+    <div className="container course-detail" style={courseTheme(c)}>
       <Link className="text-link" to="/courses">
         <ArrowLeft size={16} />
         All courses
       </Link>
-      <Alert message={r.error || error} />
+      <Alert message={r.error || (!payment ? error : '')} />
       <Alert message={success} success />
       {r.loading ? (
         <Loading />
@@ -408,7 +392,7 @@ export function CourseDetails() {
           <>
             <div className="course-detail-heading">
               <div>
-                <div className="eyebrow">YOUR PATH TO PROGRESS</div>
+                <div className="eyebrow">MRCEM EXAM PREPARATION</div>
                 <h1>{c.title}</h1>
                 <p>{c.short_description}</p>
                 <div className="inline-facts">
@@ -426,15 +410,10 @@ export function CourseDetails() {
             </div>
             <div className="course-detail-grid">
               <div>
-                <section className="panel padded">
-                  <h2>About this course</h2>
-                  <p className="prose-text">{c.description}</p>
-                </section>
-                <section className="panel padded">
+                <section className="panel padded course-exams" aria-labelledby="course-exams-title">
                   <div className="section-heading compact">
                     <div>
-                      <h2>Your practice pathway</h2>
-                      <p>Focused sessions to build your confidence.</p>
+                      <h2 id="course-exams-title">Practice exams</h2>
                     </div>
                     <Badge>{c.exams?.length} exams</Badge>
                   </div>
@@ -446,7 +425,7 @@ export function CourseDetails() {
                           <h3>{ex.title}</h3>
                           <p>
                             {ex.duration_minutes} minutes <span>·</span> {ex.questions_count}{' '}
-                            prompts <span>·</span> {ex.total_marks} marks
+                            questions <span>·</span> {ex.total_marks} marks
                           </p>
                         </div>
                         {active ? (
@@ -466,6 +445,10 @@ export function CourseDetails() {
                       />
                     )}
                   </div>
+                </section>
+                <section className="panel padded course-about">
+                  <h2>About this course</h2>
+                  <p className="prose-text">{c.description}</p>
                 </section>
               </div>
               <aside>
@@ -519,31 +502,38 @@ export function CourseDetails() {
                   </div>
                 </div>
                 {payment && (
-                  <form className="panel padded payment-form" onSubmit={pay}>
-                    <h3>Payment details</h3>
-                    <p className="prose-text">{settings.data?.payment_instructions}</p>
-                    <Field label="Payment method">
-                      <select name="payment_method" required>
-                        <option value="bKash">bKash</option>
-                        <option value="Nagad">Nagad</option>
-                        <option value="Bank transfer">Bank transfer</option>
-                      </select>
-                    </Field>
-                    <Field label="Transaction reference">
-                      <input name="transaction_reference" required maxLength={255} />
-                    </Field>
-                    <Field label="Payment date">
-                      <input
-                        name="paid_at"
-                        type="date"
-                        required
-                        max={new Date().toISOString().slice(0, 10)}
-                      />
-                    </Field>
-                    <button className="btn btn-dark btn-full" disabled={busy}>
-                      Submit for approval
-                    </button>
-                  </form>
+                  <Modal title="Payment details" busy={busy} onClose={() => setPayment(false)}>
+                    <form className="payment-form" onSubmit={pay}>
+                      <p>
+                        <strong>
+                          {c.title} · {money(c.price)}
+                        </strong>
+                      </p>
+                      <Alert message={error} />
+                      <p className="prose-text">{settings.data?.payment_instructions}</p>
+                      <Field label="Payment method">
+                        <select name="payment_method" required>
+                          <option value="bKash">bKash</option>
+                          <option value="Nagad">Nagad</option>
+                          <option value="Bank transfer">Bank transfer</option>
+                        </select>
+                      </Field>
+                      <Field label="Transaction reference">
+                        <input name="transaction_reference" required maxLength={255} />
+                      </Field>
+                      <Field label="Payment date">
+                        <input
+                          name="paid_at"
+                          type="date"
+                          required
+                          max={new Date().toISOString().slice(0, 10)}
+                        />
+                      </Field>
+                      <button className="btn btn-dark btn-full" disabled={busy}>
+                        Submit for approval
+                      </button>
+                    </form>
+                  </Modal>
                 )}
               </aside>
             </div>
@@ -603,7 +593,7 @@ export function ExamInstructions() {
                   <div>
                     <BookOpen />
                     <strong>{ex.questions_count}</strong>
-                    <span>Total prompts</span>
+                    <span>Total questions</span>
                   </div>
                   <div>
                     <ChartNoAxesCombined />
@@ -666,7 +656,9 @@ export function ExamInstructions() {
 }
 export function Results() {
   const [page, setPage] = useState(1);
-  const r = useResource(`/my-attempts?page=${page}`);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const r = useResource(`/my-attempts?${new URLSearchParams({ page, search, status })}`);
   return (
     <>
       <PageTitle
@@ -674,6 +666,39 @@ export function Results() {
         title="Every attempt is progress."
         text="Review your exams and see how far you’ve come."
       />
+      <div className="catalog-toolbar">
+        <SearchBox
+          value={search}
+          onChange={(v) => {
+            setSearch(v);
+            setPage(1);
+          }}
+          placeholder="Search exams"
+        />
+        <select
+          aria-label="Attempt status"
+          value={status}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">All attempts</option>
+          <option value="submitted">Submitted</option>
+          <option value="expired">Expired</option>
+          <option value="in_progress">In progress</option>
+        </select>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => {
+            setSearch('');
+            setStatus('');
+            setPage(1);
+          }}
+        >
+          Reset filters
+        </button>
+      </div>
       <Alert message={r.error} />
       {r.loading ? (
         <Loading />
@@ -691,6 +716,7 @@ export function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [busy, setBusy] = useState(false);
+  const [editor, setEditor] = useState(null);
   async function save(e, password = false) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -705,6 +731,7 @@ export function Profile() {
       if (!password) setUser(data);
       else form.reset();
       setSuccess(password ? data.message : 'Your profile has been updated.');
+      setEditor(null);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -718,62 +745,113 @@ export function Profile() {
         title="Your account."
         text="Keep your details up to date and your account secure."
       />
-      <Alert message={error} />
+      <Alert message={!editor ? error : ''} />
       <Alert message={success} success />
       <div className="two-column">
-        <form className="panel padded" onSubmit={(e) => save(e)}>
+        <section className="panel padded profile-summary">
           <h2>Personal details</h2>
-          <Field label="Full name">
-            <input name="name" required defaultValue={user?.name} />
-          </Field>
-          <Field label="Email address">
-            <input name="email" type="email" required defaultValue={user?.email} />
-          </Field>
-          <button className="btn btn-dark" disabled={busy}>
-            Save changes
-          </button>
-        </form>
-        <form className="panel padded" onSubmit={(e) => save(e, true)}>
-          <h2>Change password</h2>
-          <Field label="Current password">
-            <input
-              name="current_password"
-              type="password"
-              autoComplete="current-password"
-              required
-            />
-          </Field>
-          <Field
-            label="New password"
-            hint="At least 10 characters, including a letter and a number."
+          <p>
+            <strong>{user?.name}</strong>
+          </p>
+          <p>{user?.email}</p>
+          <button
+            className="btn btn-dark"
+            onClick={() => {
+              setError('');
+              setEditor('profile');
+            }}
           >
-            <input
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              minLength={10}
-              required
-            />
-          </Field>
-          <Field label="Confirm new password">
-            <input
-              name="password_confirmation"
-              type="password"
-              autoComplete="new-password"
-              minLength={10}
-              required
-            />
-          </Field>
-          <button className="btn btn-dark" disabled={busy}>
-            Update password
+            Edit profile
           </button>
-        </form>
+        </section>
+        <section className="panel padded profile-summary">
+          <h2>Password</h2>
+          <button
+            className="btn btn-outline"
+            onClick={() => {
+              setError('');
+              setEditor('password');
+            }}
+          >
+            Change password
+          </button>
+        </section>
       </div>
+      {editor === 'profile' && (
+        <Modal title="Personal details" busy={busy} onClose={() => setEditor(null)}>
+          <Alert message={error} />
+          <form onSubmit={(e) => save(e)}>
+            <Field label="Full name">
+              <input name="name" required defaultValue={user?.name} />
+            </Field>
+            <Field label="Email address">
+              <input name="email" type="email" required defaultValue={user?.email} />
+            </Field>
+            <button className="btn btn-dark" disabled={busy}>
+              Save changes
+            </button>
+          </form>
+        </Modal>
+      )}
+      {editor === 'password' && (
+        <Modal title="Change password" busy={busy} onClose={() => setEditor(null)}>
+          <Alert message={error} />
+          <form onSubmit={(e) => save(e, true)}>
+            <Field label="Current password">
+              <input
+                name="current_password"
+                type="password"
+                autoComplete="current-password"
+                required
+              />
+            </Field>
+            <Field
+              label="New password"
+              hint="At least 10 characters, including a letter and a number."
+            >
+              <input
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                minLength={10}
+                required
+              />
+            </Field>
+            <Field label="Confirm new password">
+              <input
+                name="password_confirmation"
+                type="password"
+                autoComplete="new-password"
+                minLength={10}
+                required
+              />
+            </Field>
+            <button className="btn btn-dark" disabled={busy}>
+              Update password
+            </button>
+          </form>
+        </Modal>
+      )}
     </>
   );
 }
 export function Payments() {
   const r = useResource('/my-payments');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const effectiveStatus = (row) =>
+    row.status === 'active' && row.expires_at && new Date(row.expires_at) <= new Date()
+      ? 'expired'
+      : row.status;
+  const rows = (r.data || []).filter(
+    (row) =>
+      (!status || effectiveStatus(row) === status) &&
+      [row.course?.title, row.transaction_reference, row.payment_method]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+  );
   return (
     <>
       <PageTitle
@@ -781,10 +859,32 @@ export function Payments() {
         title="A clear record."
         text="Track your submitted payments and enrollment approvals."
       />
+      <div className="catalog-toolbar">
+        <SearchBox value={search} onChange={setSearch} placeholder="Search payments" />
+        <select
+          aria-label="Filter status"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="">All statuses</option>
+          <option value="pending">pending</option>
+          <option value="approved">approved</option>
+          <option value="rejected">rejected</option>
+        </select>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => {
+            setSearch('');
+            setStatus('');
+          }}
+        >
+          Reset filters
+        </button>
+      </div>
       <Alert message={r.error} />
       {r.loading ? (
         <Loading />
-      ) : r.data?.length ? (
+      ) : rows.length ? (
         <div className="panel table-wrap">
           <table>
             <thead>
@@ -797,7 +897,7 @@ export function Payments() {
               </tr>
             </thead>
             <tbody>
-              {r.data.map((p) => (
+              {rows.map((p) => (
                 <tr key={p.id}>
                   <td>
                     <strong>{p.course.title}</strong>
@@ -818,7 +918,10 @@ export function Payments() {
           </table>
         </div>
       ) : (
-        <Empty title="No payments yet" text="Payments for premium courses will appear here.">
+        <Empty
+          title={search || status ? 'No matching payments' : 'No payments yet'}
+          text="Payments for premium courses will appear here."
+        >
           <Link className="btn btn-outline" to="/courses?type=paid">
             Explore premium courses
           </Link>

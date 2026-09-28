@@ -1,0 +1,461 @@
+/* Administration: readable text, clear controls and restrained colour. */
+.admin-workspace {
+  --green: #2158ad;
+  --deep: #193f6b;
+  --muted: #455b70;
+  --line: #c3d2e2;
+  background: #f2f6fc;
+  color: #19354d;
+}
+.admin-workspace :is(h1, h2, h3, h4) {
+  color: #19354d;
+  font-weight: 700;
+}
+.admin-workspace .page-title h1 {
+  font-weight: 750;
+}
+.admin-workspace .page-title p {
+  color: #455b70;
+  font-size: 13px;
+}
+.admin-workspace .eyebrow {
+  color: #24558b;
+  font-size: 10px;
+  font-weight: 700;
+}
+.admin-workspace .sidebar,
+.admin-workspace .workspace-header {
+  background: #fff;
+  border-color: #c3d2e2;
+}
+.admin-workspace .brand {
+  color: #194575;
+}
+.admin-workspace .brand-mark {
+  background: #2158ad;
+  color: #fff;
+}
+.admin-workspace .brand-sub {
+  color: #126e66;
+}
+.admin-workspace .workspace-label {
+  color: #455b70;
+  font-size: 10px;
+  font-weight: 700;
+}
+.admin-workspace .side-nav > a {
+  color: #344f68;
+  font-size: 13px;
+  font-weight: 600;
+}
+.admin-workspace .side-nav > a > svg {
+  color: #426588;
+}
+.admin-workspace .side-nav > a:hover {
+  background: #e6eefc;
+  color: #194b91;
+}
+.admin-workspace .side-nav > a.active {
+  background: #2158ad;
+  color: #fff;
+}
+.admin-workspace .side-nav > a.active > svg {
+  color: #fff;
+}
+.admin-workspace .switch-workspace {
+  color: #2158ad;
+  font-size: 12px;
+  font-weight: 600;
+}
+.admin-workspace .profile-link {
+  border-color: #c3d2e2;
+}
+.admin-workspace .profile-link strong {
+  font-size: 12px;
+}
+.admin-workspace .profile-link small {
+  color: #455b70;
+  font-size: 10px;
+}
+.admin-workspace .avatar {
+  background: #dce8fd;
+  color: #2158ad;
+}
+.admin-workspace :is(.breadcrumb, .header-date, .workspace-footer) {
+  color: #455b70;
+  font-size: 11px;
+}
+.admin-workspace .breadcrumb strong {
+  color: #194575;
+  font-weight: 650;
+}
+.admin-workspace .breadcrumb > svg {
+  color: #526d87;
+}
+.admin-workspace .workspace-footer {
+  border-color: #c3d2e2;
+}
+.admin-workspace .text-link {
+  color: #2158ad;
+  font-weight: 700;
+  font-size: 12px;
+}
+.admin-workspace .text-link:hover {
+  color: #163f7f;
+}
+.admin-workspace .btn-dark {
+  background: #2158ad;
+  color: #fff;
+  font-weight: 700;
+}
+.admin-workspace .btn-dark:hover {
+  background: #163f7f;
+}
+.admin-workspace .btn-outline {
+  background: #fff;
+  border-color: #8da7c1;
+  color: #214f83;
+  font-weight: 650;
+}
+.admin-workspace .btn-outline:hover {
+  background: #e7effc;
+}
+.admin-workspace .btn:disabled {
+  opacity: 0.7;
+}
+.admin-workspace .icon-button {
+  color: #315b86;
+}
+.admin-workspace .icon-button:hover {
+  color: #163f7f;
+  background: #dfeafa;
+}
+.admin-workspace .icon-button.danger {
+  color: #a02e3e;
+}
+.admin-workspace .icon-button.danger:hover {
+  background: #f9e0e6;
+  color: #8c2132;
+}
+.admin-workspace :focus-visible {
+  outline-color: #3873c9;
+}
+.admin-workspace .panel {
+  background: #fff;
+  border-color: #c3d2e2;
+}
+.admin-workspace .panel-heading {
+  background: #e7effc;
+  border-color: #c3d2e2;
+}
+.admin-workspace .panel-heading h3 {
+  font-size: 16px;
+}
+.admin-workspace .admin-stat {
+  --stat-accent: #2158ad;
+  background: #e7efff;
+  border: 1px solid #c1d3f0;
+  border-left: 4px solid var(--stat-accent);
+}
+.admin-workspace .admin-stat:nth-child(3n + 2) {
+  --stat-accent: #126e66;
+  background: #def3eb;
+  border-color: #addbca;
+  border-left-color: var(--stat-accent);
+}
+.admin-workspace .admin-stat:nth-child(3n) {
+  --stat-accent: #70419d;
+  background: #eee4fa;
+  border-color: #d6bfe9;
+  border-left-color: var(--stat-accent);
+}
+.admin-workspace .admin-stat > span {
+  color: #344d65;
+  font-size: 13px;
+  font-weight: 650;
+  display: block;
+  padding-right: 23px;
+}
+.admin-workspace .admin-stat > strong {
+  color: var(--stat-accent);
+  font-weight: 750;
+  font-size: 32px;
+}
+.admin-workspace .admin-stat > svg {
+  color: var(--stat-accent);
+}
+.admin-workspace .admin-quick-links > a {
+  border-top: 3px solid #2158ad;
+}
+.admin-workspace .admin-quick-links > a:nth-child(2) {
+  border-top-color: #126e66;
+}
+.admin-workspace .admin-quick-links > a:nth-child(3) {
+  border-top-color: #70419d;
+}
+.admin-workspace .admin-quick-links > a:hover {
+  background: #edf3fd;
+}
+.admin-workspace .admin-quick-links > a > svg {
+  color: #2158ad;
+}
+.admin-workspace .admin-quick-links h3 {
+  font-size: 16px;
+}
+.admin-workspace .admin-quick-links p {
+  color: #455b70;
+  font-size: 12px;
+}
+.admin-workspace .simple-row {
+  border-color: #d5e0ea;
+  font-size: 12px;
+}
+.admin-workspace .simple-row strong {
+  color: #19354d;
+  font-weight: 650;
+}
+.admin-workspace .simple-row small {
+  color: #455b70;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.admin-workspace .simple-row > span:last-child:not(.avatar):not(.badge) {
+  color: #455b70;
+  font-size: 11px;
+}
+.admin-workspace table {
+  background: #fff;
+  font-size: 13px;
+}
+.admin-workspace th {
+  background: #193f6b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-color: #193f6b;
+}
+.admin-workspace td {
+  color: #344f68;
+  border-color: #cbd8e6;
+}
+.admin-workspace td strong {
+  color: #19354d;
+  font-weight: 650;
+  font-size: 13px;
+}
+.admin-workspace td small {
+  color: #455b70;
+  font-size: 11px;
+}
+.admin-workspace tbody tr:nth-child(even) {
+  background: #f2f6fc;
+}
+.admin-workspace tbody tr:hover {
+  background: #e8f0fb;
+}
+.admin-workspace .row-actions .icon-button {
+  background: #e7effc;
+  border: 1px solid #adc4dd;
+}
+.admin-workspace .row-actions .danger {
+  background: #f9e4e9;
+  border-color: #dfaeb9;
+}
+.admin-workspace .badge {
+  font-size: 11px;
+  font-weight: 700;
+}
+.admin-workspace .badge-green {
+  color: #15573c;
+  background: #d8eee3;
+}
+.admin-workspace .badge-purple {
+  color: #63398c;
+  background: #eadff6;
+}
+.admin-workspace .badge-amber {
+  color: #79500b;
+  background: #fae6b5;
+}
+.admin-workspace .badge-red {
+  color: #982b3c;
+  background: #f8dfe5;
+}
+.admin-workspace .badge-neutral {
+  color: #394e64;
+  background: #e0e7f0;
+}
+.admin-workspace .search-box {
+  color: #455b70;
+  background: #fff;
+  border-color: #8da7c1;
+}
+.admin-workspace :is(input, select, textarea) {
+  color: #19354d;
+  background: #fff;
+  border-color: #8da7c1;
+}
+.admin-workspace :is(input, textarea)::placeholder {
+  color: #596d80;
+  opacity: 1;
+}
+.admin-workspace :is(input, select, textarea):focus {
+  border-color: #2158ad;
+  box-shadow: 0 0 0 3px #dce8fd;
+}
+.admin-workspace input[type='file']::file-selector-button {
+  background: #dce8fd;
+  color: #194575;
+}
+.admin-workspace .field {
+  color: #29465f;
+  font-size: 13px;
+  font-weight: 650;
+}
+.admin-workspace .field small {
+  color: #455b70;
+  font-size: 12px;
+}
+.admin-workspace .checkbox-label {
+  color: #29465f;
+  font-size: 12px;
+}
+.admin-workspace .modal {
+  background: #fff;
+  border: 1px solid #8da7c1;
+}
+.admin-workspace .modal-header {
+  border-color: #c3d2e2;
+}
+.admin-workspace .modal-header h2 {
+  font-weight: 750;
+}
+.admin-workspace .modal-header .eyebrow {
+  font-size: 10px;
+}
+.admin-workspace .editor-footer {
+  border-color: #c3d2e2;
+}
+.admin-workspace .editor-footer > span {
+  color: #455b70;
+  font-size: 12px;
+}
+.admin-workspace :is(.option-editor, .bank-picker, .review-payment-summary) {
+  background: #edf3fd;
+  border-color: #bdcfe3;
+}
+.admin-workspace .option-editor .section-heading p {
+  color: #455b70;
+  font-size: 12px;
+}
+.admin-workspace .option-editor-row > span {
+  color: #294f77;
+  font-size: 12px;
+  font-weight: 650;
+}
+.admin-workspace .assignment-row {
+  border-color: #cbd8e6;
+}
+.admin-workspace .assignment-row strong {
+  color: #29465f;
+  font-size: 12px;
+  font-weight: 600;
+}
+.admin-workspace .assignment-row small {
+  color: #455b70;
+  font-size: 11px;
+}
+.admin-workspace .exam-index {
+  background: #dce8fd;
+  color: #2158ad;
+  font-weight: 700;
+}
+.admin-workspace .marks-input > span {
+  color: #455b70;
+  font-size: 10px;
+}
+.admin-workspace .bank-row {
+  color: #29465f;
+  font-size: 12px;
+  border-color: #cbd8e6;
+}
+.admin-workspace .bank-row small {
+  color: #455b70;
+  font-size: 11px;
+}
+.admin-workspace .bank-row .btn {
+  font-size: 11px;
+}
+.admin-workspace .review-payment-summary > strong {
+  color: #2158ad;
+  font-weight: 750;
+}
+.admin-workspace .inline-facts {
+  color: #455b70;
+}
+.admin-workspace .information-note {
+  color: #294f77;
+  background: #e7effc;
+  border-color: #bdcfe3;
+}
+.admin-workspace .instruction-list {
+  color: #455b70;
+  font-size: 13px;
+}
+.admin-workspace .import-errors {
+  background: #fff2d9;
+  border-color: #d6b573;
+}
+.admin-workspace .import-errors h3,
+.admin-workspace .import-errors p {
+  color: #775111;
+}
+.admin-workspace .import-errors p {
+  font-size: 12px;
+}
+.admin-workspace .import-confirm > span {
+  color: #455b70;
+}
+.admin-workspace .alert {
+  background: #fce6eb;
+  border-color: #dfaeb9;
+  color: #982b3c;
+}
+.admin-workspace .alert-success {
+  background: #def2e6;
+  border-color: #a6cdb5;
+  color: #195d3e;
+}
+.admin-workspace .icon-tile {
+  color: #2158ad;
+  background: #e2edfc;
+}
+.admin-workspace .loading {
+  color: #455b70;
+}
+.admin-workspace .pagination {
+  color: #455b70;
+}
+@media (max-width: 640px) {
+  .admin-workspace .admin-stat {
+    padding: 17px;
+  }
+  .admin-workspace .admin-stat > span {
+    font-size: 12px;
+  }
+  .admin-workspace .admin-stat > svg {
+    right: 15px;
+  }
+  .admin-workspace .admin-stat > strong {
+    font-size: 28px;
+  }
+  .admin-workspace .page-title h1 {
+    font-size: 27px;
+  }
+  .admin-workspace .page-title p {
+    font-size: 12px;
+  }
+  .admin-workspace .editor-footer {
+    flex-wrap: wrap;
+  }
+}

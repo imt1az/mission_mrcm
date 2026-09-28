@@ -177,7 +177,7 @@ function Room({ attempt }) {
       await flush();
       setIndex(next);
     } catch {
-      /* Keep the current prompt visible so the response can be retried. */
+      /* Keep the current question visible so the response can be retried. */
     }
   }
   function flag() {
@@ -221,7 +221,7 @@ function Room({ attempt }) {
         <section className="question-panel">
           <div className="question-toolbar">
             <span className="question-number">
-              PROMPT {String(index + 1).padStart(2, '0')}{' '}
+              QUESTION {String(index + 1).padStart(2, '0')}{' '}
               <span>OF {String(attempt.questions.length).padStart(2, '0')}</span>
             </span>
             <Badge tone="neutral">
@@ -294,7 +294,7 @@ function Room({ attempt }) {
             ) : (
               <div className="information-note">
                 <Info size={20} />
-                Read this prompt, then continue when you’re ready. No answer is required.
+                Read this question, then continue when you’re ready. No answer is required.
               </div>
             )}
           </div>
@@ -364,7 +364,7 @@ function Room({ attempt }) {
               {attempt.questions.map((question, i) => (
                 <button
                   key={question.id}
-                  aria-label={`Go to prompt ${i + 1}`}
+                  aria-label={`Go to question ${i + 1}`}
                   className={`${index === i ? 'current ' : ''}${isAnswered(question.id) ? 'answered ' : ''}${flagged.has(question.id) ? 'is-flagged ' : ''}${question.question_type === 'information' ? 'is-info' : ''}`}
                   onClick={() => void move(i)}
                 >
@@ -443,7 +443,7 @@ function Room({ attempt }) {
             <h2 id="submit-title">Ready to submit?</h2>
             <p>
               You’ve answered {answered} of {attempt.total_questions} questions.
-              {flagged.size > 0 ? ` You have ${flagged.size} flagged prompts.` : ''} You won’t be
+              {flagged.size > 0 ? ` You have ${flagged.size} flagged questions.` : ''} You won’t be
               able to change your answers after submission.
             </p>
             <div className="modal-actions">

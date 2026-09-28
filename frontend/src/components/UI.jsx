@@ -1,3 +1,4 @@
+import { courseTheme } from '../lib/courseTheme';
 import {
   ArrowRight,
   BookOpen,
@@ -6,9 +7,7 @@ import {
   ChevronRight,
   LoaderCircle,
   Search,
-  ShieldCheck,
   Sparkles,
-  Stethoscope,
   X,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -17,11 +16,8 @@ import { human, money } from '../lib/api';
 export function Brand({ light = false }) {
   return (
     <Link to="/" className={`brand ${light ? 'brand-light' : ''}`} aria-label="Mission MRCEM home">
-      <span className="brand-mark">
-        M<span>+</span>
-      </span>
-      <span>
-        MISSION<span className="brand-sub">MRCEM</span>
+      <span className="brand-logo-frame">
+        <img className="brand-logo" src="/images/hamed-logo.png" alt="Hamed — Critical & Emergency Medicine" width="500" height="347" />
       </span>
     </Link>
   );
@@ -152,29 +148,78 @@ export function Pagination({ page, last, onChange }) {
   ) : null;
 }
 export function CourseArt({ variant = 0, small = false }) {
-  const Icon = [Stethoscope, BookOpen, ShieldCheck][variant % 3];
   return (
     <div className={`course-art art-${variant % 3} ${small ? 'art-small' : ''}`} aria-hidden="true">
-      <Icon className="course-art-symbol" size={54} strokeWidth={1.6} />
-      <span className="art-label">MISSION MRCEM</span>
+      <div className="art-grid" />
+      <svg viewBox="0 0 300 170" fill="none">
+        <circle cx="150" cy="85" r="57" stroke="currentColor" strokeWidth="1" opacity=".35" />
+        <circle cx="150" cy="85" r="72" stroke="currentColor" strokeDasharray="3 7" opacity=".25" />
+        {variant % 3 === 0 ? (
+          <>
+            <path
+              d="M131 46h38v20h20v38h-20v20h-38v-20h-20V66h20z"
+              fill="currentColor"
+              opacity=".85"
+            />
+            <path
+              d="M97 85h34l10-17 15 33 11-16h36"
+              stroke="var(--art-bg)"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </>
+        ) : variant % 3 === 1 ? (
+          <>
+            <path
+              d="M117 114V61c12-7 23-6 33 1 10-7 23-8 33-1v53c-12-7-22-6-33 0-11-6-22-7-33 0z"
+              fill="currentColor"
+              opacity=".7"
+            />
+            <path
+              d="M150 64v47m-22-38 12 3m-12 10 12 3m20-13 12-3m-12 16 12-3"
+              stroke="var(--art-bg)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </>
+        ) : (
+          <>
+            <path
+              d="M150 42l40 17v30c0 23-40 40-40 40s-40-17-40-40V59z"
+              fill="currentColor"
+              opacity=".75"
+            />
+            <path
+              d="M127 85h13l7-13 9 26 7-13h13"
+              stroke="var(--art-bg)"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </>
+        )}
+        <path
+          d="M53 42v12m-6-6h12m187 69v12m-6-6h12"
+          stroke="currentColor"
+          opacity=".6"
+          strokeWidth="2"
+        />
+      </svg>
+      <span className="art-label">
+        MISSION MRCEM <span>✦</span>
+      </span>
     </div>
   );
 }
 export function CourseCard({ course, enrolled = false, index = 0 }) {
   return (
-    <article className={`course-card course-tone-${index % 3}`}>
+    <article className="course-card" style={courseTheme(course)}>
       <Link to={`/courses/${course.slug}`} tabIndex={-1} aria-hidden="true">
-        <CourseArt variant={index} />
+        <CourseArt variant={course.id - 1} />
       </Link>
       <div className="course-card-body">
         <div className="card-kicker">
-          <span>
-            {course.slug.includes('primary')
-              ? 'THE FOUNDATIONS'
-              : course.slug.includes('sba')
-                ? 'CLINICAL PRACTICE'
-                : 'CONTINUING LEARNING'}
-          </span>
           {enrolled ? (
             <Badge>
               <Check size={12} /> Enrolled

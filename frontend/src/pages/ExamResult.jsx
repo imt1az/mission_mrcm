@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Clock3, FileCheck2, Trophy, X } from 'lucide-react';
 import { Alert, Badge, Field, Loading, PageTitle } from '../components/UI';
 import { api, date, errorMessage, useResource } from '../lib/api';
 export function ExamResult({ admin = false }) {
   const { id } = useParams();
+  const { state } = useLocation();
+  const back = state?.resultsBack?.startsWith('/admin/results?')
+    ? state.resultsBack
+    : '/admin/results';
   const r = useResource(admin ? `/admin/results/${id}` : `/exam-attempts/${id}/result`);
   const result = r.data;
   return (
-    <>
-      <Link className="text-link" to={admin ? '/admin/results' : '/results'}>
+    <div className="exam-result-page">
+      <Link className="text-link" to={admin ? back : '/results'}>
         <ArrowLeft size={16} />
         All results
       </Link>
@@ -32,7 +36,9 @@ export function ExamResult({ admin = false }) {
               </div>
             ) : (
               <>
-                <div className="result-summary">
+                <div
+                  className={`result-summary ${result.pending_count ? 'result-pending' : result.passed ? 'result-passed' : 'result-below-pass'}`}
+                >
                   <div
                     className="result-ring"
                     style={{ '--score': `${Math.max(0, Math.min(100, result.percentage || 0))}%` }}
@@ -57,21 +63,13 @@ export function ExamResult({ admin = false }) {
                           Pass mark reached
                         </>
                       ) : (
-                        'Keep building your knowledge'
+                        'Below pass mark'
                       )}
                     </Badge>
-                    <h2>
-                      {result.pending_count
-                        ? 'One more step to your result.'
-                        : result.passed
-                          ? 'A step forward. Well done.'
-                          : 'Every attempt teaches you something.'}
-                    </h2>
-                    <p>
-                      {result.pending_count
-                        ? `${result.pending_count} written response${result.pending_count === 1 ? '' : 's'} awaiting review. Your current score is provisional.`
-                        : 'Take a moment to reflect, review your answers, and plan your next practice session.'}
-                    </p>
+                    <h2>{result.pending_count ? 'Provisional result' : 'Exam result'}</h2>
+                    {!!result.pending_count && (
+                      <p>{`${result.pending_count} written response${result.pending_count === 1 ? '' : 's'} awaiting review. Your current score is provisional.`}</p>
+                    )}
                     <span className="result-marks">
                       <strong>{result.score}</strong> / {result.total_marks} marks <span>·</span>{' '}
                       Pass mark: {result.pass_mark}
@@ -81,27 +79,30 @@ export function ExamResult({ admin = false }) {
                 <div className="result-counts">
                   <div>
                     <span className="result-dot green" />
-                    Correct choices<strong>{result.correct_count}</strong>
+                    <span>Correct choices</span>
+                    <strong>{result.correct_count}</strong>
                   </div>
                   <div>
                     <span className="result-dot red" />
-                    Incorrect choices<strong>{result.wrong_count}</strong>
+                    <span>Incorrect choices</span>
+                    <strong>{result.wrong_count}</strong>
                   </div>
                   <div>
                     <span className="result-dot gray" />
-                    Unanswered<strong>{result.unanswered_count}</strong>
+                    <span>Unanswered</span>
+                    <strong>{result.unanswered_count}</strong>
                   </div>
                   <div>
                     <span className="result-dot amber" />
-                    Pending grading<strong>{result.pending_count}</strong>
+                    <span>Pending grading</span>
+                    <strong>{result.pending_count}</strong>
                   </div>
                 </div>
                 {result.review_visible ? (
                   <section className="content-section">
                     <div className="section-heading">
                       <div>
-                        <h2>A closer look at your answers.</h2>
-                        <p>Use each question as a starting point for your next step.</p>
+                        <h2>Answer review</h2>
                       </div>
                     </div>
                     {result.questions.map((q, i) => (
@@ -134,7 +135,7 @@ export function ExamResult({ admin = false }) {
           </>
         )
       )}
-    </>
+    </div>
   );
 }
 function ReviewQuestion({ question: q, index, admin, attemptId, onGraded }) {
@@ -157,7 +158,7 @@ function ReviewQuestion({ question: q, index, admin, attemptId, onGraded }) {
   return (
     <article className="panel review-question">
       <div className="review-heading">
-        <span className="eyebrow">PROMPT {String(index + 1).padStart(2, '0')}</span>
+        <span className="eyebrow">QUESTION {String(index + 1).padStart(2, '0')}</span>
         <Badge
           tone={
             a?.grading_status === 'pending' ? 'amber' : a?.is_correct === false ? 'red' : 'green'

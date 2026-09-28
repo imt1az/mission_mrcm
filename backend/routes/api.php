@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LearningController;
+use App\Http\Controllers\ResultBrowserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -63,9 +64,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::put('enrollments/{enrollment}', [AdminController::class, 'updateEnrollment']);
         Route::get('payments', [AdminController::class, 'payments']);
         Route::put('payments/{payment}', [AdminController::class, 'verifyPayment']);
-        Route::get('results', [AdminController::class, 'results']);
+        Route::get('filter-options', [ResultBrowserController::class, 'options']);
+        Route::get('result-courses', [ResultBrowserController::class, 'courses']);
+        Route::get('result-exams', [ResultBrowserController::class, 'exams']);
+        Route::get('results', [ResultBrowserController::class, 'results']);
         Route::get('results/{attempt}', [AdminController::class, 'result']);
-        Route::put('results/{attempt}/grade/{question}',[AdminController::class, 'grade']);
-        Route::put('settings',[AdminController::class, 'settings']);
+        Route::put('results/{attempt}/grade/{question}', [AdminController::class, 'grade']);
+        Route::put('settings', [AdminController::class, 'settings']);
     });
 });

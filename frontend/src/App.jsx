@@ -15,6 +15,7 @@ import {
 } from './pages/Learning';
 import { ExamRoom } from './pages/ExamRoom';
 import { ExamResult } from './pages/ExamResult';
+import { AdminResults } from './admin/AdminResults';
 import { AdminDashboard, AdminList, AdminSettings, ImportQuestions } from './admin/Admin';
 
 class ErrorBoundary extends Component {
@@ -73,23 +74,17 @@ export default function App() {
         <Route element={<Protected admin />}>
           <Route element={<Workspace admin />}>
             <Route path="/admin" element={<AdminDashboard />} />
-            {[
-              'courses',
-              'exams',
-              'questions',
-              'subjects',
-              'users',
-              'enrollments',
-              'payments',
-              'results',
-            ].map((kind) => (
-              <Route
-                key={kind}
-                path={`/admin/${kind}`}
-                element={<AdminList key={kind} kind={kind} />}
-              />
-            ))}
+            {['courses', 'exams', 'questions', 'subjects', 'users', 'enrollments', 'payments'].map(
+              (kind) => (
+                <Route
+                  key={kind}
+                  path={`/admin/${kind}`}
+                  element={<AdminList key={kind} kind={kind} />}
+                />
+              ),
+            )}
             <Route path="/admin/questions/import" element={<ImportQuestions />} />
+            <Route path="/admin/results" element={<AdminResults />} />
             <Route path="/admin/results/:id" element={<ExamResult admin />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>

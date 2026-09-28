@@ -52,6 +52,55 @@ class PlatformTest extends TestCase
         $this->exam->questions()->attach($this->text->id, ['marks' => 3, 'sort_order' => 1]);
     }
 
+    public function test_new_courses_are_first_and_catalogue_filters_keep_drafts_private(): void
+    {
+        $data = ['title' => 'Latest course', 'slug' => 'latest-course', 'short_description' => 'New', 'description' => 'New course', 'course_type' => 'paid', 'price' => 900, 'status' => 'published'];
+        $id = $this->actingAs($this->admin)->postJson('/api/admin/courses', $data)->assertCreated()->json('id');
+        $this->postJson('/api/admin/courses', array_replace($data, ['slug' => 'hidden-course', 'status' => 'draft']))->assertCreated();
+        $this->getJson('/api/courses')->assertOk()->assertJsonPath('total', 2)->assertJsonPath('data.0.id', $id);
+        $this->getJson('/api/courses?type=paid&search=Latest')->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $id);
+        $this->getJson('/api/courses?sort=oldest')->assertJsonPath('data.0.id', $this->course->id);
+        $this->getJson('/api/admin/courses?status=draft&type=paid&search=Latest')->assertJsonPath('total', 1)->assertJsonPath('data.0.slug', 'hidden-course');
+        $this->getJson('/api/dashboard')->assertJsonPath('available_courses.0.id', $id);
+    }
+
+    public function test_result_browser_groups_filters_and_preserves_archived_history(): void
+    {
+        $first = $this->start();
+        $this->answer($first, $this->text, text: 'Please review');
+        app(ExamService::class)->finish($first);
+        $other = User::factory()->create(['role' => 'doctor', 'status' => 'active']);
+        CourseEnrollment::create(['user_id' => $other->id, 'course_id' => $this->course->id, 'status' => 'active']);
+        $second = app(ExamService::class)->start($other, $this->exam);
+        $second->update(['expires_at' => now()->subMinute()]);
+        $this->actingAs($this->doctor)->getJson('/api/admin/result-courses')->assertForbidden();
+        $this->getJson('/api/admin/result-exams?course_id='.$this->course->id)->assertForbidden();
+        $this->getJson('/api/admin/filter-options')->assertForbidden();
+        $this->actingAs($this->admin)->getJson('/api/admin/result-courses')->assertOk()->assertJsonPath('data.0.attempts_count', 2);
+        $this->getJson('/api/admin/result-exams?course_id='.$this->course->id)->assertOk()->assertJsonPath('data.0.attempts_count', 2);
+        $url = '/api/admin/results?course_id='.$this->course->id.'&exam_id='.$this->exam->id;
+        $this->getJson($url.'&status=expired')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $second->id);
+        $this->putJson('/api/admin/results/'.$second->id.'/grade/'.$this->text->id, ['marks_awarded' => 0])->assertOk();
+        $this->getJson($url)->assertJsonPath('summary.students', 2)->assertJsonPath('summary.attempts', 2)->assertJsonMissingPath('data.0.snapshot');
+        $this->getJson($url.'&pending=1')->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $first->id)->assertJsonPath('data.0.passed', null);
+        $this->getJson($url.'&search='.urlencode($other->email))->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $second->id);
+        $this->getJson($url.'&date_from='.now()->addDay()->toDateString())->assertJsonPath('total', 0);
+        $this->getJson($url.'&date_from=invalid')->assertUnprocessable();
+        $this->exam->delete();
+        $this->course->delete();
+        $this->getJson('/api/admin/result-courses')->assertJsonPath('data.0.attempts_count', 2)->assertJsonPath('data.0.exams_count', 1);
+        $this->getJson('/api/admin/result-exams?course_id='.$this->course->id)->assertJsonPath('data.0.id', $this->exam->id);
+        $this->getJson($url)->assertJsonPath('total', 2);
+    }
+
+    public function test_personal_result_filters_never_include_other_students(): void
+    {
+        $attempt = $this->start();
+        $this->actingAs($this->doctor)->getJson('/api/my-attempts?status=in_progress&search=Demo')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $attempt->id)->assertJsonPath('data.0.score', null);
+        $this->getJson('/api/my-attempts?status=submitted')->assertJsonPath('total', 0);
+        $this->actingAs($this->admin)->getJson('/api/my-attempts')->assertJsonPath('total', 0);
+    }
+
     private function choiceData(array $overrides = []): array
     {
         return array_replace(['subject_id' => null, 'question_type' => 'single_choice', 'question_text' => 'Choose the test answer.', 'explanation' => 'The correct explanation must stay secret.', 'status' => 'published', 'options' => [

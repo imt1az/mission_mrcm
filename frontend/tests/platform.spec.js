@@ -30,7 +30,7 @@ test('public catalogue, search, course information and mobile layout', async ({
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'MRCEM Exam Preparation' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /A clear path to your MRCEM/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'MRCEM Primary', exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('home-desktop.png'), fullPage: true });
   await page.goto('/courses');
@@ -41,7 +41,7 @@ test('public catalogue, search, course information and mobile layout', async ({
   await expect.poll(() => page.locator('.course-card').count()).toBeGreaterThanOrEqual(3);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'MRCEM Exam Preparation' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /A clear path to your MRCEM/ })).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
   ).toBeTruthy();

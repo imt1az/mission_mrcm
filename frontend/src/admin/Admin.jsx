@@ -1,3 +1,4 @@
+import { Modal } from '../components/Modal';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -193,13 +194,18 @@ export function AdminList({ kind }) {
   const [page, setPage] = useState(1);
   const [subject, setSubject] = useState('');
   const [filter, setFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [courseFilter, setCourseFilter] = useState('');
+  const filterOptions = useResource(
+    ['exams', 'enrollments', 'payments'].includes(kind) ? '/admin/filter-options' : null,
+  );
   const [edit, setEdit] = useState(null);
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
-  const path = `/admin/${kind}?page=${page}&search=${encodeURIComponent(search)}&subject=${subject}${kind === 'payments' ? '&status=' + filter : kind === 'results' ? '&pending=' + filter : ''}`;
+  const path = `/admin/${kind}?${new URLSearchParams({ page, search, subject, status: filter, type: typeFilter, course_id: courseFilter })}`;
   const r = useResource(path);
   const subjects = useResource(kind === 'questions' ? '/admin/subjects' : null);
   const rows = Array.isArray(r.data) ? r.data : r.data?.data || [];
@@ -209,6 +215,8 @@ export function AdminList({ kind }) {
     setSearch('');
     setSubject('');
     setFilter('');
+    setTypeFilter('');
+    setCourseFilter('');
     setEdit(null);
     setDetail(null);
     setError('');
@@ -220,8 +228,22 @@ export function AdminList({ kind }) {
     try {
       if (edit?.id) await api.put(`/admin/${kind}/${edit.id}`, data);
       else await api.post(`/admin/${kind}`, data);
+      if (!edit?.id) {
+        setSearch('');
+        setSubject('');
+        setFilter('');
+        setTypeFilter('');
+        setCourseFilter('');
+        setPage(1);
+        navigate(`/admin/${kind}`, { replace: true });
+      }
       setEdit(null);
-      setSuccess('Changes saved.');
+      setSuccess(
+        !edit?.id && kind === 'courses'
+          ? `Course created. ${data.status === 'published' ? 'It is now first in the public catalogue.' : 'Publish it when ready to show it in the public catalogue.'}`
+          : 'Changes saved.',
+      );
+      window.scrollTo({ top: 0, behavior: 'instant' });
       r.reload();
     } catch (e) {
       setError(errorMessage(e));
@@ -313,34 +335,79 @@ export function AdminList({ kind }) {
             ))}
           </select>
         )}
-        {kind === 'payments' && (
+        <select
+          aria-label="Filter by status"
+          value={filter}
+          onChange={(e) => {
+            setFilter(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">All statuses</option>
+          {(kind === 'payments'
+            ? ['pending', 'approved', 'rejected']
+            : kind === 'enrollments'
+              ? ['pending', 'active', 'expired', 'cancelled']
+              : ['users', 'subjects'].includes(kind)
+                ? ['active', 'inactive']
+                : ['draft', 'published', 'inactive']
+          ).map((v) => (
+            <option key={v} value={v}>
+              {human(v)}
+            </option>
+          ))}
+        </select>
+        {['courses', 'questions'].includes(kind) && (
           <select
-            aria-label="Payment status"
-            value={filter}
+            aria-label="Filter by type"
+            value={typeFilter}
             onChange={(e) => {
-              setFilter(e.target.value);
+              setTypeFilter(e.target.value);
               setPage(1);
             }}
           >
-            <option value="">All payments</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
+            <option value="">All types</option>
+            {(kind === 'courses'
+              ? ['free', 'paid']
+              : ['single_choice', 'text_response', 'information']
+            ).map((v) => (
+              <option key={v} value={v}>
+                {human(v)}
+              </option>
+            ))}
           </select>
         )}
-        {kind === 'results' && (
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={filter === '1'}
-              onChange={(e) => {
-                setFilter(e.target.checked ? '1' : '');
-                setPage(1);
-              }}
-            />
-            Needs manual grading
-          </label>
+        {['exams', 'enrollments', 'payments'].includes(kind) && (
+          <select
+            aria-label="Filter by course"
+            value={courseFilter}
+            onChange={(e) => {
+              setCourseFilter(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All courses</option>
+            {filterOptions.data?.courses?.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title}
+                {c.deleted_at ? ' (archived)' : ''}
+              </option>
+            ))}
+          </select>
         )}
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => {
+            setSearch('');
+            setSubject('');
+            setFilter('');
+            setTypeFilter('');
+            setCourseFilter('');
+            setPage(1);
+          }}
+        >
+          Reset filters
+        </button>
         <span className="muted small">{r.data?.total ?? rows.length} records</span>
       </div>
       {r.loading ? (
@@ -398,7 +465,7 @@ export function AdminList({ kind }) {
                       <>
                         {row.duration_minutes} minutes
                         <small>
-                          {row.questions_count} prompts · {row.total_marks} marks
+                          {row.questions_count} questions · {row.total_marks} marks
                         </small>
                       </>
                     ) : kind === 'questions' ? (
@@ -510,90 +577,48 @@ export function AdminList({ kind }) {
       )}
       {r.data?.last_page && <Pagination page={page} last={r.data.last_page} onChange={setPage} />}{' '}
       {edit && (
-        <div className="modal-backdrop">
-          <section
-            className={`modal ${kind === 'exams' || kind === 'questions' ? 'wide-modal' : ''}`}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="editor-title"
-          >
-            <div className="modal-header">
-              <div>
-                <span className="eyebrow">ADMIN WORKSPACE</span>
-                <h2 id="editor-title">
-                  {edit.id ? 'Edit' : 'Create'}{' '}
-                  {kind === 'questions'
-                    ? 'question'
-                    : kind === 'subjects'
-                      ? 'subject'
-                      : kind === 'courses'
-                        ? 'course'
-                        : kind === 'exams'
-                          ? 'exam'
-                          : kind === 'users'
-                            ? 'account'
-                            : kind === 'payments'
-                              ? 'payment review'
-                              : 'enrollment'}
-                </h2>
-              </div>
-              <button
-                className="icon-button"
-                aria-label="Close editor"
-                disabled={busy}
-                onClick={() => setEdit(null)}
-              >
-                <X />
-              </button>
-            </div>
-            <Alert message={error} />
-            {kind === 'questions' ? (
-              <QuestionEditor row={edit} busy={busy} onSave={save} />
-            ) : kind === 'exams' ? (
-              <ExamEditor row={edit} busy={busy} onSave={save} />
-            ) : (
-              <SimpleEditor kind={kind} row={edit} busy={busy} onSave={save} />
-            )}
-          </section>
-        </div>
+        <Modal
+          title={`${edit.id ? 'Edit' : 'Create'} ${{ courses: 'course', exams: 'exam', questions: 'question', subjects: 'subject', users: 'account', payments: 'payment review', enrollments: 'enrollment' }[kind]}`}
+          busy={busy}
+          wide={['exams', 'questions'].includes(kind)}
+          closeLabel="Close editor"
+          onClose={() => setEdit(null)}
+        >
+          <Alert message={error} />
+          {kind === 'questions' ? (
+            <QuestionEditor row={edit} busy={busy} onSave={save} />
+          ) : kind === 'exams' ? (
+            <ExamEditor row={edit} busy={busy} onSave={save} />
+          ) : (
+            <SimpleEditor kind={kind} row={edit} busy={busy} onSave={save} />
+          )}
+        </Modal>
       )}
       {detail && (
-        <div className="modal-backdrop">
-          <section className="modal" role="dialog" aria-modal="true" aria-label="Doctor details">
-            <div className="modal-header">
-              <h2>{detail.name}</h2>
-              <button
-                className="icon-button"
-                aria-label="Close details"
-                onClick={() => setDetail(null)}
-              >
-                <X />
-              </button>
+        <Modal title={detail.name} closeLabel="Close details" onClose={() => setDetail(null)}>
+          <p>{detail.email}</p>
+          <h3>Enrolled courses</h3>
+          {detail.enrollments.map((en) => (
+            <div className="simple-row" key={en.id}>
+              <strong>{en.course?.title}</strong>
+              <Status value={en.status} />
             </div>
-            <p>{detail.email}</p>
-            <h3>Enrolled courses</h3>
-            {detail.enrollments.map((en) => (
-              <div className="simple-row" key={en.id}>
-                <strong>{en.course?.title}</strong>
-                <Status value={en.status} />
-              </div>
-            ))}
-            <h3>Exam attempts</h3>
-            {detail.attempts.map((a) => (
-              <div className="simple-row" key={a.id}>
-                <span>{a.exam?.title}</span>
-                {a.status === 'in_progress' ? (
-                  <Status value={a.status} />
-                ) : (
-                  <Link to={`/admin/results/${a.id}`} className="text-link">
-                    Review result
-                    <ArrowRight size={14} />
-                  </Link>
-                )}
-              </div>
-            ))}
-          </section>
-        </div>
+          ))}
+          <h3>Exam attempts</h3>
+          {detail.attempts.map((a) => (
+            <div className="simple-row" key={a.id}>
+              <span>{a.exam?.title}</span>
+              {a.status === 'in_progress' ? (
+                <Status value={a.status} />
+              ) : (
+                <Link to={`/admin/results/${a.id}`} className="text-link">
+                  Review result
+                  <ArrowRight size={14} />
+                </Link>
+              )}
+            </div>
+          ))}
+        </Modal>
       )}
     </>
   );
@@ -777,7 +802,7 @@ function QuestionEditor({ row, onSave, busy }) {
           <select value={type} onChange={(e) => setType(e.target.value)}>
             <option value="single_choice">Single choice</option>
             <option value="text_response">Text response</option>
-            <option value="information">Information prompt</option>
+            <option value="information">Information question</option>
           </select>
         </Field>
         <Field label="Subject (optional)">
@@ -886,7 +911,7 @@ function QuestionEditor({ row, onSave, busy }) {
         <div className="information-note">
           {type === 'text_response'
             ? 'Doctors write their response. An administrator awards marks after submission.'
-            : 'An information prompt is not scored and does not require an answer.'}
+            : 'An information question is not scored and does not require an answer.'}
         </div>
       )}
       <Field label="Explanation (optional)">

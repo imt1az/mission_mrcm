@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Facebook, Heart, Mail, MapPin, Phone, Youtube } from 'lucide-react';
+import { ArrowUpRight, Facebook, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 import { Brand } from './UI';
 
 export function SiteFooter() {
@@ -91,12 +91,18 @@ export function SiteFooter() {
       </div>
       <div className="container footer-bottom">
         <p>
-          © 2024 Designed &amp; Developed with{' '}
-          <Heart size={12} className="footer-heart" aria-label="love" /> by{' '}
-          <a href="https://charlie.riseinventor.com/" target="_blank" rel="noopener noreferrer">
-            Rise Inventor
+          © 2024 Developed by{' '}
+          <a href="mailto:imtiazemon625@gmail.com">
+            Imtiaz Ahmed Chowdhury
           </a>
           . All Rights Reserved.
+        </p>
+        <p>
+          WhatsApp:{' '}
+          <a href="https://wa.me/8801684277944" target="_blank" rel="noopener noreferrer">
+            01684277944
+          </a>
+          {' · '}Email: <a href="mailto:imtiazemon625@gmail.com">imtiazemon625@gmail.com</a>
         </p>
         <p>
           Site Owner:{' '}

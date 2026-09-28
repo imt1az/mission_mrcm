@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import { ArrowRight, BookOpen, Clock3, ShieldCheck, Sparkles } from 'lucide-react';
 import { CourseCard, Alert, Loading } from '../components/UI';
 import { useResource } from '../lib/api';
@@ -6,8 +7,40 @@ import { MentorSection, VideoSection } from '../components/MentorSection';
 import { HomeHero } from '../components/HomeHero';
 export function Home() {
   const courses = useResource('/courses');
+  const home = useRef(null);
+  useEffect(() => {
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (motion.matches || !('IntersectionObserver' in window)) return;
+    const animations = new Set();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (!isIntersecting) return;
+        observer.unobserve(target);
+        if (motion.matches) return;
+        const animation = target.animate(
+          [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'translateY(0)' }],
+          { duration: 650, easing: 'cubic-bezier(.2,.7,.2,1)' },
+        );
+        animations.add(animation);
+        animation.onfinish = () => animations.delete(animation);
+      });
+    }, { threshold: 0.08 });
+    home.current.querySelectorAll(':scope > section:not(.landing-hero), .feature-strip').forEach(el => observer.observe(el));
+    const stopMotion = () => {
+      if (motion.matches) {
+        observer.disconnect();
+        animations.forEach(animation => animation.cancel());
+      }
+    };
+    motion.addEventListener('change', stopMotion);
+    return () => {
+      observer.disconnect();
+      animations.forEach(animation => animation.cancel());
+      motion.removeEventListener('change', stopMotion);
+    };
+  }, []);
   return (
-    <>
+    <div className="home-page" ref={home}>
       <HomeHero />
       <div className="feature-strip">
         <div className="container">
@@ -98,6 +131,6 @@ export function Home() {
           <ArrowRight size={18} />
         </Link>
       </section>
-    </>
+    </div>
   );
 }

@@ -1,0 +1,41 @@
+/* Use the supplied artwork unchanged; the frame trims its empty outer space. */
+.brand-logo-frame {
+  position: relative;
+  display: block;
+  width: 190px;
+  aspect-ratio: 410 / 164;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 6px;
+}
+.brand .brand-logo {
+  position: absolute;
+  width: 122%;
+  max-width: none;
+  height: auto;
+  left: -12%;
+  top: -64.6%;
+}
+.sidebar .brand-logo-frame { width: 165px; }
+.site-footer .brand-logo-frame { width: 210px; }
+@media (max-width: 760px) {
+  .public-header .brand-logo-frame { width: 155px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .home-page .landing-hero-copy { animation: home-arrive .7s ease-out both; }
+  .home-page .landing-hero-figure { animation: home-arrive .8s .15s ease-out both; }
+  .home-page .landing-hero-artwork { animation: home-float 5s 1s ease-in-out 3; }
+  .home-page .landing-hero-actions > a { transition: transform .2s ease, box-shadow .2s ease; }
+  .home-page .landing-hero-actions > a:hover { transform: translateY(-3px); box-shadow: 0 8px 22px #001d3930; }
+  .home-page .steps-grid > div { transition: transform .25s ease, box-shadow .25s ease; }
+  .home-page .steps-grid > div:hover { transform: translateY(-5px); box-shadow: 0 10px 24px #173b6412; }
+  @keyframes home-arrive {
+    from { opacity: 0; transform: translateY(22px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes home-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}

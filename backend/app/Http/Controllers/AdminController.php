@@ -35,7 +35,7 @@ class AdminController extends Controller
 
     public function courses(Request $r)
     {
-        return Course::withCount('exams', 'enrollments')->when($r->input('search'), fn ($q, $s) => $q->where('title', 'like', '%'.$s.'%'))->latest()->paginate(50);
+        return Course::when($r->input('status'), fn ($q, $s) => $q->where('status', $s))->when($r->input('type'), fn ($q, $s) => $q->where('course_type', $s))->withCount('exams', 'enrollments')->when($r->input('search'), fn ($q, $s) => $q->where('title', 'like', '%'.$s.'%'))->orderByDesc('id')->paginate(50);
     }
 
     public function saveCourse(Request $r, ?Course $course = null)
@@ -70,7 +70,7 @@ class AdminController extends Controller
 
     public function subjects(Request $r)
     {
-        return Subject::withCount('questions')->when($r->input('search'), fn ($q, $s) => $q->where('name', 'like', '%'.$s.'%'))->orderBy('name')->get();
+        return Subject::when($r->input('status'), fn ($q, $s) => $q->where('status', $s))->withCount('questions')->when($r->input('search'), fn ($q, $s) => $q->where('name', 'like', '%'.$s.'%'))->orderBy('name')->get();
     }
 
     public function saveSubject(Request $r, ?Subject $subject = null)
@@ -95,10 +95,10 @@ class AdminController extends Controller
 
     public function questions(Request $r)
     {
-        return Question::with('options', 'subject')->when($r->input('search'), fn ($q, $s) => $q->where('question_text', 'like', '%'.$s.'%'))
+        return Question::when($r->input('status'), fn ($q, $s) => $q->where('status', $s))->with('options', 'subject')->when($r->input('search'), fn ($q, $s) => $q->where('question_text', 'like', '%'.$s.'%'))
             ->when($r->input('subject') === 'uncategorized', fn ($q) => $q->whereNull('subject_id'))
             ->when(is_numeric($r->input('subject')), fn ($q) => $q->where('subject_id', $r->input('subject')))
-            ->when($r->input('type'), fn ($q, $s) => $q->where('question_type', $s))->latest()->paginate(50);
+            ->when($r->input('type'), fn ($q, $s) => $q->where('question_type', $s))->orderByDesc('id')->paginate(50);
     }
 
     public function saveQuestion(Request $r, QuestionService $service, ?Question $question = null)
@@ -116,8 +116,8 @@ class AdminController extends Controller
 
     public function exams(Request $r)
     {
-        return Exam::with('course')->withCount('questions')->when($r->input('course_id'), fn ($q, $id) => $q->where('course_id', $id))
-            ->when($r->input('search'), fn ($q, $s) => $q->where('title', 'like', '%'.$s.'%'))->latest()->paginate(50);
+        return Exam::when($r->input('status'), fn ($q, $s) => $q->where('status', $s))->with('course')->withCount('questions')->when($r->input('course_id'), fn ($q, $id) => $q->where('course_id', $id))
+            ->when($r->input('search'), fn ($q, $s) => $q->where('title', 'like', '%'.$s.'%'))->orderByDesc('id')->paginate(50);
     }
 
     public function exam(Exam $exam)
@@ -183,7 +183,7 @@ class AdminController extends Controller
 
     public function users(Request $r)
     {
-        return User::withCount('enrollments', 'attempts')->when($r->input('search'), fn ($q, $s) => $q->where(fn ($x) => $x->where('name', 'like', '%'.$s.'%')->orWhere('email', 'like', '%'.$s.'%')))->latest()->paginate(30);
+        return User::when($r->input('status'), fn ($q, $s) => $q->where('status', $s))->when($r->input('role'), fn ($q, $s) => $q->where('role', $s))->withCount('enrollments', 'attempts')->when($r->input('search'), fn ($q, $s) => $q->where(fn ($x) => $x->where('name', 'like', '%'.$s.'%')->orWhere('email', 'like', '%'.$s.'%')))->orderByDesc('id')->paginate(30);
     }
 
     public function user(User $user)
@@ -206,8 +206,8 @@ class AdminController extends Controller
 
     public function enrollments(Request $r)
     {
-        return CourseEnrollment::with('user', 'course')->when($r->input('course_id'), fn ($q, $id) => $q->where('course_id', $id))
-            ->when($r->input('search'), fn ($q, $s) => $q->where(fn ($q) => $q->whereHas('user', fn ($u) => $u->where('name', 'like', '%'.$s.'%')->orWhere('email', 'like', '%'.$s.'%'))->orWhereHas('course', fn ($c) => $c->where('title', 'like', '%'.$s.'%'))))->latest()->paginate(30);
+        return CourseEnrollment::when($r->input('status'), fn ($q, $s) => $q->where('status', $s))->with('user', 'course')->when($r->input('course_id'), fn ($q, $id) => $q->where('course_id', $id))
+            ->when($r->input('search'), fn ($q, $s) => $q->where(fn ($q) => $q->whereHas('user', fn ($u) => $u->where('name', 'like', '%'.$s.'%')->orWhere('email', 'like', '%'.$s.'%'))->orWhereHas('course', fn ($c) => $c->where('title', 'like', '%'.$s.'%'))))->orderByDesc('id')->paginate(30);
     }
 
     public function updateEnrollment(Request $r, CourseEnrollment $enrollment)
@@ -223,7 +223,7 @@ class AdminController extends Controller
 
     public function payments(Request $r)
     {
-        return Payment::with('user', 'course')->when($r->input('status'), fn ($q, $s) => $q->where('status', $s))
+        return Payment::when($r->input('course_id'), fn ($q, $id) => $q->where('course_id', $id))->with('user', 'course')->when($r->input('status'), fn ($q, $s) => $q->where('status', $s))
             ->when($r->input('search'), fn ($q, $s) => $q->where(fn ($q) => $q->where('transaction_reference', 'like', '%'.$s.'%')->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%'.$s.'%'))->orWhereHas('course', fn ($c) => $c->where('title', 'like', '%'.$s.'%'))))->latest()->paginate(30);
     }
 

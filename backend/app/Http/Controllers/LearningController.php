@@ -18,7 +18,10 @@ class LearningController extends Controller
     {
         return Course::where('status', 'published')->withCount(['exams' => fn ($q) => $q->where('status', 'published')])
             ->when($r->input('search'), fn ($q, $s) => $q->where('title', 'like', '%'.$s.'%'))
-            ->when(in_array($r->input('type'), ['free', 'paid']), fn ($q) => $q->where('course_type', $r->input('type')))->orderBy('id')->paginate(12);
+            ->when(in_array($r->input('type'), ['free', 'paid']), fn ($q) => $q->where('course_type', $r->input('type')))
+            ->when($r->input('sort') === 'title', fn ($q) => $q->orderBy('title'))
+            ->when($r->input('sort') === 'price', fn ($q) => $q->orderBy('price'))
+            ->orderBy('id', $r->input('sort') === 'oldest' ? 'asc' : 'desc')->paginate(12);
     }
 
     public function course(string $slug)
@@ -52,7 +55,7 @@ class LearningController extends Controller
         return ['enrolled_count' => $r->user()->enrollments()->active()->count(), 'attempt_count' => $attempts->count(),
             'average_score' => $graded->count() ? round($graded->avg(fn ($a) => 100 * $a['score'] / $a['total_marks'])) : null,
             'recent_attempts' => $history->take(5)->values(), 'enrollments' => $this->myCourses($r)->take(3)->values(),
-            'available_courses' => Course::where('status', 'published')->withCount(['exams' => fn ($q) => $q->where('status', 'published')])->take(3)->get()];
+            'available_courses' => Course::where('status', 'published')->withCount(['exams' => fn ($q) => $q->where('status', 'published')])->orderByDesc('id')->take(3)->get()];
     }
 
     public function exam(Request $r, Exam $exam, ExamService $service)
@@ -109,7 +112,10 @@ class LearningController extends Controller
 
     public function history(Request $r, ExamService $service)
     {
-        $page = $r->user()->attempts()->latest()->paginate(20);
+        $page = $r->user()->attempts()
+            ->when($r->input('search'), fn ($q, $s) => $q->whereHas('exam', fn ($e) => $e->where('title', 'like', '%'.$s.'%')))
+            ->when($r->input('status'), fn ($q, $s) => $q->where('status', $s))
+            ->orderByDesc('id')->paginate(20);
         $page->setCollection($page->getCollection()->map(fn ($a) => $service->history($a)));
 
         return $page;

@@ -121,7 +121,7 @@ export function Workspace({ admin = false }) {
     }
   }
   return (
-    <div className="workspace">
+    <div className={`workspace ${admin ? 'admin-workspace' : 'student-workspace'}`}>
       {open && (
         <button
           className="sidebar-overlay"
@@ -156,16 +156,6 @@ export function Workspace({ admin = false }) {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          {!admin && (
-            <div className="sidebar-note">
-              <span className="note-star">✳</span>
-              <h4>One step closer.</h4>
-              <p>Your next chapter in emergency medicine starts with today's practice.</p>
-              <Link to="/courses">
-                Find your next course <ArrowUpRight size={15} />
-              </Link>
-            </div>
-          )}
           {user?.role === 'admin' && (
             <Link className="switch-workspace" to={admin ? '/dashboard' : '/admin'}>
               <ShieldCheck size={17} />
@@ -219,10 +209,16 @@ export function Workspace({ admin = false }) {
           <Outlet />
         </main>
         <footer className="workspace-footer">
-          <span>Made for your next milestone.</span>
-          <span>
-            Mission MRCEM <span className="footer-dot">•</span> Learn with purpose
-          </span>
+          {admin ? (
+            <>
+              <span>Made for your next milestone.</span>
+              <span>
+                Mission MRCEM <span className="footer-dot">•</span> Learn with purpose
+              </span>
+            </>
+          ) : (
+            <span>Mission MRCEM</span>
+          )}
         </footer>
       </div>
     </div>

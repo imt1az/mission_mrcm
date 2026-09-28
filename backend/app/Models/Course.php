@@ -21,6 +21,11 @@ class Course extends Model
         return $this->hasMany(Exam::class);
     }
 
+    public function attempts()
+    {
+        return $this->hasManyThrough(ExamAttempt::class, Exam::class)->withTrashedParents();
+    }
+
     public function enrollments()
     {
         return $this->hasMany(CourseEnrollment::class);
